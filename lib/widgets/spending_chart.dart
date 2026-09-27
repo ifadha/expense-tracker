@@ -5,12 +5,14 @@ class SpendingChartWidget extends StatelessWidget {
   final List<Map<String, dynamic>> monthlyData;
 
   const SpendingChartWidget({
-    Key? key,
+    super.key,
     required this.monthlyData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? AppConstants.textLight : AppConstants.textDark;
     double maxVal = 100.0;
     for (final d in monthlyData) {
       final inc = (d['income'] as num).toDouble();
@@ -22,11 +24,11 @@ class SpendingChartWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppConstants.cardDark : Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E143C).withOpacity(0.04),
+            color: const Color(0xFF1E143C).withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -39,24 +41,31 @@ class SpendingChartWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
+                  color: isDark
+                      ? const Color(0xFF101827)
+                      : const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF283449)
+                          : const Color(0xFFE2E8F0)),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Text(
                       'Monthly',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppConstants.textDark,
+                        color: textColor,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down, size: 16, color: AppConstants.textMuted),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_down,
+                        size: 16, color: AppConstants.textMuted),
                   ],
                 ),
               ),
@@ -80,8 +89,10 @@ class SpendingChartWidget extends StatelessWidget {
               children: monthlyData.map((d) {
                 final income = (d['income'] as num).toDouble();
                 final expense = (d['expense'] as num).toDouble();
-                final incomeRatio = (income / maxVal).clamp(0.1, 1.0);
-                final expenseRatio = (expense / maxVal).clamp(0.1, 1.0);
+                final incomeRatio =
+                    income <= 0 ? 0.0 : (income / maxVal).clamp(0.1, 1.0);
+                final expenseRatio =
+                    expense <= 0 ? 0.0 : (expense / maxVal).clamp(0.1, 1.0);
 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -113,10 +124,12 @@ class SpendingChartWidget extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       d['month'] as String,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: AppConstants.textMuted,
+                        color: isDark
+                            ? AppConstants.textLight.withValues(alpha: 0.7)
+                            : AppConstants.textMuted,
                       ),
                     ),
                   ],

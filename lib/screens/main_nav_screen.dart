@@ -11,9 +11,9 @@ class MainNavScreen extends StatefulWidget {
   final ExpenseService expenseService;
 
   const MainNavScreen({
-    Key? key,
+    super.key,
     required this.expenseService,
-  }) : super(key: key);
+  });
 
   @override
   State<MainNavScreen> createState() => _MainNavScreenState();
@@ -46,8 +46,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppConstants.backgroundLight,
+      backgroundColor:
+          isDark ? AppConstants.backgroundDark : AppConstants.backgroundLight,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
@@ -58,12 +60,15 @@ class _MainNavScreenState extends State<MainNavScreen> {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.96),
+            color: isDark
+                ? AppConstants.cardDark
+                : Colors.white.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: Colors.white),
+            border: Border.all(
+                color: isDark ? const Color(0xFF2B374B) : Colors.white),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF1E143C).withOpacity(0.08),
+                color: Colors.black.withValues(alpha: isDark ? 0.24 : 0.08),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -73,8 +78,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-              _buildNavItem(1, Icons.receipt_long_outlined, Icons.receipt_long, 'Transactions'),
-              
+              _buildNavItem(1, Icons.receipt_long_outlined, Icons.receipt_long,
+                  'Transactions'),
+
               // Elevated Center FAB
               GestureDetector(
                 onTap: _openAddExpense,
@@ -86,7 +92,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppConstants.primaryDark.withOpacity(0.35),
+                        color: AppConstants.primaryDark.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -96,7 +102,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
                 ),
               ),
 
-              _buildNavItem(2, Icons.bar_chart_outlined, Icons.bar_chart, 'Analytics'),
+              _buildNavItem(
+                  2, Icons.bar_chart_outlined, Icons.bar_chart, 'Analytics'),
               _buildNavItem(3, Icons.person_outline, Icons.person, 'Account'),
             ],
           ),
@@ -105,8 +112,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData unselectedIcon, IconData selectedIcon, String label) {
+  Widget _buildNavItem(
+      int index, IconData unselectedIcon, IconData selectedIcon, String label) {
     final isSelected = _currentIndex == index;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
       borderRadius: BorderRadius.circular(20),
@@ -117,7 +126,11 @@ class _MainNavScreenState extends State<MainNavScreen> {
           children: [
             Icon(
               isSelected ? selectedIcon : unselectedIcon,
-              color: isSelected ? AppConstants.primaryPurple : AppConstants.textMuted,
+              color: isSelected
+                  ? AppConstants.primaryPurple
+                  : (isDark
+                      ? AppConstants.textLight.withValues(alpha: 0.7)
+                      : AppConstants.textMuted),
               size: 22,
             ),
             const SizedBox(height: 3),
@@ -126,7 +139,11 @@ class _MainNavScreenState extends State<MainNavScreen> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppConstants.primaryPurple : AppConstants.textMuted,
+                color: isSelected
+                    ? AppConstants.primaryPurple
+                    : (isDark
+                        ? AppConstants.textLight.withValues(alpha: 0.7)
+                        : AppConstants.textMuted),
               ),
             ),
           ],

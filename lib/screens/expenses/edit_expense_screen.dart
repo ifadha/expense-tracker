@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../../services/expense_service.dart';
+import '../../services/settings_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/validators.dart';
 import '../../widgets/category_selector.dart';
@@ -11,10 +12,10 @@ class EditExpenseScreen extends StatefulWidget {
   final Expense expense;
 
   const EditExpenseScreen({
-    Key? key,
+    super.key,
     required this.expenseService,
     required this.expense,
-  }) : super(key: key);
+  });
 
   @override
   State<EditExpenseScreen> createState() => _EditExpenseScreenState();
@@ -39,7 +40,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.expense.title);
-    _amountController = TextEditingController(text: widget.expense.amount.toStringAsFixed(2));
+    _amountController =
+        TextEditingController(text: widget.expense.amount.toStringAsFixed(2));
     _noteController = TextEditingController(text: widget.expense.note ?? '');
     _selectedCategoryId = widget.expense.categoryId;
     _selectedDate = widget.expense.date;
@@ -81,7 +83,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
         categoryId: _selectedCategoryId,
         date: _selectedDate,
         wallet: _selectedWallet,
-        note: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+        note: _noteController.text.trim().isNotEmpty
+            ? _noteController.text.trim()
+            : null,
         type: _type,
         recurring: _recurring,
       );
@@ -99,7 +103,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Update failed: $e'), backgroundColor: AppConstants.expenseRed),
+          SnackBar(
+              content: Text('Update failed: $e'),
+              backgroundColor: AppConstants.expenseRed),
         );
       }
     } finally {
@@ -113,7 +119,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Delete Expense?'),
-        content: const Text('Are you sure you want to permanently delete this expense from Cloud Firestore?'),
+        content: const Text(
+            'Are you sure you want to permanently delete this expense from Cloud Firestore?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -121,7 +128,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppConstants.expenseRed),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.expenseRed),
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -141,7 +149,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Delete failed: $e'), backgroundColor: AppConstants.expenseRed),
+            SnackBar(
+                content: Text('Delete failed: $e'),
+                backgroundColor: AppConstants.expenseRed),
           );
         }
       } finally {
@@ -152,21 +162,30 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = AppSettingsService.instance.selectedCurrency;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final textColor = isDark ? AppConstants.textLight : AppConstants.textDark;
+    final secondaryTextColor = isDark
+        ? AppConstants.textLight.withValues(alpha: 0.7)
+        : AppConstants.textMuted;
+
     return Scaffold(
-      backgroundColor: AppConstants.backgroundLight,
+      backgroundColor:
+          isDark ? AppConstants.backgroundDark : AppConstants.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppConstants.textDark),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Edit Expense',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: AppConstants.textDark,
+            color: textColor,
           ),
         ),
         actions: [
@@ -177,7 +196,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.delete_outline, color: AppConstants.expenseRed),
+                : const Icon(Icons.delete_outline,
+                    color: AppConstants.expenseRed),
             onPressed: _isDeleting ? null : _confirmDelete,
           ),
         ],
@@ -189,9 +209,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             physics: const BouncingScrollPhysics(),
             children: [
-              const Text(
+              Text(
                 'Expense Title',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor),
               ),
               const SizedBox(height: 6),
               TextFormField(
@@ -199,63 +222,85 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 validator: FormValidators.validateTitle,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                  fillColor: surfaceColor,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Amount',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor),
               ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _amountController,
                 validator: FormValidators.validateAmount,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  prefixText: '\$  |  ',
+                  prefixText: '$currency  |  ',
                   filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                  fillColor: surfaceColor,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Category',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor),
               ),
               const SizedBox(height: 8),
               CategorySelectorWidget(
                 selectedCategoryId: _selectedCategoryId,
-                onCategorySelected: (cat) => setState(() => _selectedCategoryId = cat),
+                onCategorySelected: (cat) =>
+                    setState(() => _selectedCategoryId = cat),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Date',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor),
               ),
               const SizedBox(height: 6),
               InkWell(
                 onTap: _pickDate,
                 borderRadius: BorderRadius.circular(18),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(18)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(DateFormat('dd/MM/yyyy').format(_selectedDate),
                           style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const Icon(Icons.calendar_today_outlined, size: 16, color: AppConstants.primaryPurple),
+                      const Icon(Icons.calendar_today_outlined,
+                          size: 16, color: AppConstants.primaryPurple),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Note',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: secondaryTextColor),
               ),
               const SizedBox(height: 6),
               TextFormField(
@@ -264,8 +309,10 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 maxLines: 2,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                  fillColor: surfaceColor,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 28),
@@ -277,11 +324,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppConstants.primaryPurple,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
                   ),
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Update Expense', style: TextStyle(fontWeight: FontWeight.w700)),
+                      : const Text('Update Expense',
+                          style: TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

@@ -43,7 +43,8 @@ class Expense {
   String get categoryId => category;
 
   /// Factory constructor to deserialize from Cloud Firestore DocumentSnapshot
-  factory Expense.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
+  factory Expense.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data();
     if (data == null) {
       throw StateError('Expense document does not exist: ${snapshot.id}');
@@ -89,7 +90,9 @@ class Expense {
       date: parsedDate,
       note: data['note'] as String?,
       wallet: (data['wallet'] as String?) ?? 'Spending Wallet',
-      type: (data['type'] == 'income') ? TransactionType.income : TransactionType.expense,
+      type: (data['type'] == 'income')
+          ? TransactionType.income
+          : TransactionType.expense,
       recurring: (data['recurring'] as bool?) ?? false,
       createdAt: parsedCreatedAt,
       updatedAt: parsedUpdatedAt,
@@ -102,9 +105,11 @@ class Expense {
       'title': title.trim(),
       'amount': amount,
       'category': category,
-      'categoryId': category, // Maintained for database schema & security rule compatibility
+      'categoryId':
+          category, // Maintained for database schema & security rule compatibility
       // Store formatted date string for clean indexing & range queries
-      'date': '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+      'date':
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
       'timestamp': Timestamp.fromDate(date),
       'wallet': wallet,
       if (note != null && note!.trim().isNotEmpty) 'note': note!.trim(),

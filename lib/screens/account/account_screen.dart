@@ -1,32 +1,31 @@
 import 'package:flutter/material.dart';
 import '../../services/expense_service.dart';
+import '../../services/settings_service.dart';
 import '../../utils/constants.dart';
 
 class AccountScreen extends StatefulWidget {
   final ExpenseService expenseService;
 
   const AccountScreen({
-    Key? key,
+    super.key,
     required this.expenseService,
-  }) : super(key: key);
+  });
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  String _selectedCurrency = '\$';
-  final _budgetController = TextEditingController(text: '3200');
+  final AppSettingsService _settings = AppSettingsService.instance;
+  late final TextEditingController _budgetController;
   bool _isSaved = false;
 
-  final List<Map<String, String>> _currencies = [
-    {'symbol': '\$', 'name': 'USD (\$)'},
-    {'symbol': '€', 'name': 'EUR (€)'},
-    {'symbol': '£', 'name': 'GBP (£)'},
-    {'symbol': '¥', 'name': 'JPY (¥)'},
-    {'symbol': '₹', 'name': 'INR (₹)'},
-    {'symbol': 'C\$', 'name': 'CAD (C\$)'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _budgetController =
+        TextEditingController(text: _settings.monthlyBudget.toStringAsFixed(0));
+  }
 
   @override
   void dispose() {
@@ -34,8 +33,23 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
-  void _saveBudget() {
+  Future<void> _saveBudget() async {
+    final rawValue = _budgetController.text.trim();
+    if (rawValue.isEmpty) {
+      _showBudgetError('Please enter a valid monthly budget.');
+      return;
+    }
+
+    final parsed = double.tryParse(rawValue);
+    if (parsed == null || parsed <= 0) {
+      _showBudgetError('Budget must be greater than zero.');
+      return;
+    }
+
+    await _settings.setMonthlyBudget(parsed);
     setState(() => _isSaved = true);
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Target budget updated successfully'),
@@ -43,26 +57,47 @@ class _AccountScreenState extends State<AccountScreen> {
         duration: Duration(seconds: 2),
       ),
     );
+
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _isSaved = false);
     });
   }
 
+  void _showBudgetError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppConstants.expenseRed,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedCurrency = _settings.selectedCurrency;
+    const currencySymbols = AppConstants.currencyOptions;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppConstants.backgroundLight,
+      backgroundColor:
+          isDark ? AppConstants.backgroundDark : AppConstants.backgroundLight,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFDED7FC),
-              Color(0xFFF4F2FB),
-              Color(0xFFF6F5FC),
-            ],
-            stops: [0.0, 0.25, 1.0],
+            colors: isDark
+                ? [
+                    const Color(0xFF111827),
+                    const Color(0xFF172033),
+                    const Color(0xFF111827),
+                  ]
+                : [
+                    const Color(0xFFDED7FC),
+                    const Color(0xFFF4F2FB),
+                    const Color(0xFFF6F5FC),
+                  ],
+            stops: const [0.0, 0.25, 1.0],
           ),
         ),
         child: SafeArea(
@@ -70,32 +105,35 @@ class _AccountScreenState extends State<AccountScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             physics: const BouncingScrollPhysics(),
             children: [
-              // Header Title
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     'Account & Settings',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      color: AppConstants.textDark,
+                      color: isDark
+                          ? AppConstants.textLight
+                          : AppConstants.textDark,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Profile Card
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: isDark
+                      ? const Color(0xFF1A2333)
+                      : Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white),
+                  border: Border.all(
+                      color: isDark ? const Color(0xFF2B374B) : Colors.white),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1E143C).withOpacity(0.04),
+                      color: const Color(0xFF1E143C)
+                          .withValues(alpha: isDark ? 0.18 : 0.04),
                       blurRadius: 14,
                       offset: const Offset(0, 4),
                     ),
@@ -108,12 +146,16 @@ class _AccountScreenState extends State<AccountScreen> {
                       height: 54,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [AppConstants.primaryPurple, Color(0xFFA855F7)],
+                          colors: [
+                            AppConstants.primaryPurple,
+                            Color(0xFFA855F7)
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: AppConstants.primaryPurple.withOpacity(0.3),
+                            color: AppConstants.primaryPurple
+                                .withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -121,7 +163,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                       child: const Center(
                         child: Text(
-                          'AM',
+                          'IF',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -131,33 +173,18 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Alex Morgan',
+                            'Ifadha',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: AppConstants.textDark,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'alex.morgan@lumina.io',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppConstants.textMuted,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Pro Plan Active',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppConstants.primaryPurple,
+                              color: isDark
+                                  ? AppConstants.textLight
+                                  : AppConstants.textDark,
                             ),
                           ),
                         ],
@@ -167,44 +194,53 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Currency Picker Card
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: isDark
+                      ? AppConstants.cardDark
+                      : Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: Colors.white),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Display Currency',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppConstants.textDark,
+                        color: isDark
+                            ? AppConstants.textLight
+                            : AppConstants.textDark,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _currencies.map((c) {
-                        final isSelected = c['symbol'] == _selectedCurrency;
+                      children: currencySymbols.map((c) {
+                        final isSelected = c['symbol'] == selectedCurrency;
                         return ChoiceChip(
                           label: Text(c['name']!),
                           selected: isSelected,
-                          onSelected: (selected) {
+                          onSelected: (selected) async {
                             if (selected) {
-                              setState(() => _selectedCurrency = c['symbol']!);
+                              await _settings.setSelectedCurrency(c['symbol']!);
+                              if (mounted) setState(() {});
                             }
                           },
                           selectedColor: AppConstants.primaryDark,
-                          backgroundColor: const Color(0xFFF1EFF9),
+                          backgroundColor: isDark
+                              ? const Color(0xFF1F2A3A)
+                              : const Color(0xFFF1EFF9),
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppConstants.textDark,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDark
+                                    ? AppConstants.textLight
+                                    : AppConstants.textDark),
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -219,30 +255,36 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Monthly Target Budget
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: isDark
+                      ? AppConstants.cardDark
+                      : Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: Colors.white),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Monthly Target Budget',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppConstants.textDark,
+                        color: isDark
+                            ? AppConstants.textLight
+                            : AppConstants.textDark,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Used to calculate progress bars and spending velocity warnings.',
-                      style: TextStyle(fontSize: 11, color: AppConstants.textMuted),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppConstants.textLight.withValues(alpha: 0.7)
+                              : AppConstants.textMuted),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -251,15 +293,19 @@ class _AccountScreenState extends State<AccountScreen> {
                           child: TextField(
                             controller: _budgetController,
                             keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
-                              prefixText: '$_selectedCurrency ',
+                              prefixText: '$selectedCurrency ',
                               filled: true,
-                              fillColor: const Color(0xFFF8F7FC),
+                              fillColor: isDark
+                                  ? const Color(0xFF101827)
+                                  : const Color(0xFFF8F7FC),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide.none,
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 12),
                             ),
                           ),
                         ),
@@ -269,71 +315,30 @@ class _AccountScreenState extends State<AccountScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppConstants.primaryPurple,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: Text(_isSaved ? 'Saved!' : 'Save', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          child: Text(_isSaved ? 'Saved!' : 'Save',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Connected Wallets
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Connected Wallets',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppConstants.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildWalletRow(
-                      name: 'Spending Wallet',
-                      type: 'Active Checking',
-                      balance: '\$5,631.22',
-                      color: AppConstants.primaryPurple,
-                      icon: Icons.account_balance_wallet,
-                    ),
-                    const Divider(height: 16),
-                    _buildWalletRow(
-                      name: 'MasterCard Black',
-                      type: '•••• 9918 (Credit)',
-                      balance: '\$1,240.00',
-                      color: const Color(0xFFEB001B),
-                      icon: Icons.credit_card,
-                    ),
-                    const Divider(height: 16),
-                    _buildWalletRow(
-                      name: 'High-Yield Savings',
-                      type: 'Reserve vault',
-                      balance: '\$14,850.50',
-                      color: const Color(0xFF10B981),
-                      icon: Icons.savings,
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 24),
-
-              // App Version
-              const Center(
+              Center(
                 child: Text(
                   'Lumina Expense Tracker v2.4 · Flutter Material 3',
-                  style: TextStyle(fontSize: 11, color: AppConstants.textMuted),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark
+                        ? AppConstants.textLight.withValues(alpha: 0.7)
+                        : AppConstants.textMuted,
+                  ),
                 ),
               ),
               const SizedBox(height: 60),
@@ -341,56 +346,6 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildWalletRow({
-    required String name,
-    required String type,
-    required String balance,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: color, size: 18),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppConstants.textDark,
-                ),
-              ),
-              Text(
-                type,
-                style: const TextStyle(fontSize: 11, color: AppConstants.textMuted),
-              ),
-            ],
-          ),
-        ),
-        Text(
-          balance,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: AppConstants.textDark,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -11,7 +11,8 @@ class ExpenseException implements Exception {
   const ExpenseException(this.message, {this.code, this.originalError});
 
   @override
-  String toString() => 'ExpenseException: $message ${code != null ? '($code)' : ''}';
+  String toString() =>
+      'ExpenseException: $message ${code != null ? '($code)' : ''}';
 }
 
 /// Dedicated service/repository layer for Firebase Cloud Firestore operations.
@@ -51,7 +52,9 @@ class ExpenseService {
         originalError: e,
       );
     } catch (e) {
-      throw ExpenseException('An unexpected error occurred while creating expense.', originalError: e);
+      throw ExpenseException(
+          'An unexpected error occurred while creating expense.',
+          originalError: e);
     }
   }
 
@@ -91,7 +94,8 @@ class ExpenseService {
   /// One-time fetch of all expenses from Firestore, ordered descending by date.
   Future<List<Expense>> readExpenses() async {
     try {
-      final snapshot = await _expensesRef.orderBy('date', descending: true).get();
+      final snapshot =
+          await _expensesRef.orderBy('date', descending: true).get();
       return snapshot.docs.map((doc) => Expense.fromFirestore(doc)).toList();
     } on FirebaseException catch (e) {
       throw ExpenseException(
@@ -100,7 +104,8 @@ class ExpenseService {
         originalError: e,
       );
     } catch (e) {
-      throw ExpenseException('Failed to read expenses from Firestore', originalError: e);
+      throw ExpenseException('Failed to read expenses from Firestore',
+          originalError: e);
     }
   }
 
@@ -139,7 +144,8 @@ class ExpenseService {
   /// Update an existing expense in Cloud Firestore.
   Future<void> updateExpense(Expense expense) async {
     if (expense.id.isEmpty) {
-      throw const ExpenseException('Cannot update an expense with an empty ID.');
+      throw const ExpenseException(
+          'Cannot update an expense with an empty ID.');
     }
 
     try {
@@ -155,7 +161,9 @@ class ExpenseService {
         originalError: e,
       );
     } catch (e) {
-      throw ExpenseException('An unexpected error occurred while updating expense.', originalError: e);
+      throw ExpenseException(
+          'An unexpected error occurred while updating expense.',
+          originalError: e);
     }
   }
 
@@ -166,7 +174,8 @@ class ExpenseService {
   /// Delete an expense document from Cloud Firestore.
   Future<void> deleteExpense(String expenseId) async {
     if (expenseId.isEmpty) {
-      throw const ExpenseException('Cannot delete an expense with an empty ID.');
+      throw const ExpenseException(
+          'Cannot delete an expense with an empty ID.');
     }
 
     try {
@@ -178,7 +187,9 @@ class ExpenseService {
         originalError: e,
       );
     } catch (e) {
-      throw ExpenseException('An unexpected error occurred while deleting expense.', originalError: e);
+      throw ExpenseException(
+          'An unexpected error occurred while deleting expense.',
+          originalError: e);
     }
   }
 
@@ -191,7 +202,9 @@ class ExpenseService {
     if (category == null || category.trim().isEmpty || category == 'all') {
       return expenses;
     }
-    return expenses.where((e) => e.category == category || e.categoryId == category).toList();
+    return expenses
+        .where((e) => e.category == category || e.categoryId == category)
+        .toList();
   }
 
   /// Cloud Firestore query to fetch expenses for a specific category
@@ -203,7 +216,9 @@ class ExpenseService {
           .get();
       return snapshot.docs.map((doc) => Expense.fromFirestore(doc)).toList();
     } on FirebaseException catch (e) {
-      throw ExpenseException('Failed to filter expenses by category: ${e.message}', code: e.code);
+      throw ExpenseException(
+          'Failed to filter expenses by category: ${e.message}',
+          code: e.code);
     }
   }
 
@@ -230,7 +245,8 @@ class ExpenseService {
   }
 
   /// In-memory filter of an expense list for a date range (inclusive)
-  List<Expense> filterByDateRange(List<Expense> expenses, DateTime start, DateTime end) {
+  List<Expense> filterByDateRange(
+      List<Expense> expenses, DateTime start, DateTime end) {
     final startOfDay = DateTime(start.year, start.month, start.day);
     final endOfDay = DateTime(end.year, end.month, end.day, 23, 59, 59);
 
@@ -242,12 +258,15 @@ class ExpenseService {
 
   /// Query Firestore for expenses on an exact date (YYYY-MM-DD)
   Future<List<Expense>> readExpensesByDate(DateTime date) async {
-    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     try {
-      final snapshot = await _expensesRef.where('date', isEqualTo: dateStr).get();
+      final snapshot =
+          await _expensesRef.where('date', isEqualTo: dateStr).get();
       return snapshot.docs.map((doc) => Expense.fromFirestore(doc)).toList();
     } on FirebaseException catch (e) {
-      throw ExpenseException('Failed to filter expenses by date: ${e.message}', code: e.code);
+      throw ExpenseException('Failed to filter expenses by date: ${e.message}',
+          code: e.code);
     }
   }
 
@@ -262,9 +281,7 @@ class ExpenseService {
         .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Expense.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Expense.fromFirestore(doc)).toList();
     });
   }
 
@@ -282,9 +299,10 @@ class ExpenseService {
   }
 
   /// Calculate total sum for an expense list with optional transaction type
-  double calculateMonthTotal(List<Expense> expenses, {TransactionType type = TransactionType.expense}) {
+  double calculateMonthTotal(List<Expense> expenses,
+      {TransactionType type = TransactionType.expense}) {
     return expenses
         .where((e) => e.type == type)
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(0.0, (runningTotal, item) => runningTotal + item.amount);
   }
 }

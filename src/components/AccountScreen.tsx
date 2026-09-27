@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Check,
   ChevronRight,
-  Sparkles,
   Sliders,
   Smartphone,
 } from 'lucide-react';
@@ -40,7 +39,7 @@ export const AccountScreen: React.FC = () => {
     { symbol: '¥', label: 'JPY (¥)' },
     { symbol: '₹', label: 'INR (₹)' },
     { symbol: 'C$', label: 'CAD (C$)' },
-    { symbol: 'A$', label: 'AUD (A$)' },
+    { symbol: 'Rs.', label: 'LKR (Rs.)' },
   ];
 
   const handleUpdateBudget = (e: React.FormEvent) => {
@@ -65,17 +64,12 @@ export const AccountScreen: React.FC = () => {
       {/* User Profile Card */}
       <div className="bg-white/95 rounded-3xl p-4.5 shadow-[0_4px_20px_rgba(30,20,60,0.03)] border border-white/80 mb-5 flex items-center gap-3.5">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#704fe6] to-[#a855f7] text-white flex items-center justify-center font-bold text-xl shadow-sm">
-          AM
+          IF
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold text-slate-900 truncate">
-            Alex Morgan
+            Ifadha
           </h2>
-          <p className="text-xs text-slate-400 truncate">alex.morgan@lumina.io</p>
-          <div className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold text-[#704fe6] bg-[#f4f0ff] px-2 py-0.5 rounded-full">
-            <Sparkles size={11} />
-            <span>Pro Plan Active</span>
-          </div>
         </div>
       </div>
 

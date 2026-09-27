@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/category.dart';
 import '../utils/constants.dart';
 
 class CategorySelectorWidget extends StatelessWidget {
@@ -8,11 +7,11 @@ class CategorySelectorWidget extends StatelessWidget {
   final VoidCallback? onOpenFullPicker;
 
   const CategorySelectorWidget({
-    Key? key,
+    super.key,
     required this.selectedCategoryId,
     required this.onCategorySelected,
     this.onOpenFullPicker,
-  }) : super(key: key);
+  });
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
@@ -52,7 +51,10 @@ class CategorySelectorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = AppConstants.defaultCategories;
+    const categories = AppConstants.defaultCategories;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final textColor = Theme.of(context).colorScheme.onSurface;
 
     return SizedBox(
       height: 44,
@@ -68,9 +70,11 @@ class CategorySelectorWidget extends StatelessWidget {
               icon: const Icon(Icons.add, size: 14),
               label: const Text('More'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppConstants.textMuted,
-                side: BorderSide(color: Colors.grey.shade300, style: BorderStyle.solid),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                side: BorderSide(
+                    color: Colors.grey.shade300, style: BorderStyle.solid),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
               ),
             );
@@ -87,16 +91,22 @@ class CategorySelectorWidget extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.white.withOpacity(0.8),
+                color: isSelected
+                    ? surfaceColor
+                    : (isDark
+                        ? AppConstants.cardDark
+                        : Colors.white.withValues(alpha: 0.8)),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isSelected ? AppConstants.primaryPurple : Colors.white,
+                  color: isSelected
+                      ? AppConstants.primaryPurple
+                      : Theme.of(context).colorScheme.outlineVariant,
                   width: isSelected ? 1.5 : 1.0,
                 ),
                 boxShadow: [
                   if (isSelected)
                     BoxShadow(
-                      color: AppConstants.primaryPurple.withOpacity(0.12),
+                      color: AppConstants.primaryPurple.withValues(alpha: 0.12),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -115,8 +125,10 @@ class CategorySelectorWidget extends StatelessWidget {
                     cat.name,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected ? AppConstants.primaryPurple : AppConstants.textDark,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color:
+                          isSelected ? AppConstants.primaryPurple : textColor,
                     ),
                   ),
                   if (isSelected) ...[

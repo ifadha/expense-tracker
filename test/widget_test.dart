@@ -5,26 +5,46 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:lumina_expense_tracker/main.dart';
+import 'package:lumina_expense_tracker/services/settings_service.dart';
+import 'package:lumina_expense_tracker/utils/constants.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  test('currency, budget, and theme settings persist', () async {
+    SharedPreferences.setMockInitialValues({});
+    final settingsService = AppSettingsService.instance;
+    await settingsService.init();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await settingsService.setSelectedCurrency('Rs.');
+    await settingsService.setMonthlyBudget(125000);
+    await settingsService.setDarkMode(true);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await settingsService.init();
+
+    expect(settingsService.selectedCurrency, 'Rs.');
+    expect(settingsService.monthlyBudget, 125000);
+    expect(settingsService.isDarkMode, isTrue);
+  });
+
+  test('unsupported currency is ignored and invalid budget is sanitized',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    final settingsService = AppSettingsService.instance;
+    await settingsService.init();
+
+    for (final currency in AppConstants.currencyOptions) {
+      expect(settingsService.isCurrencySupported(currency['symbol']!), isTrue);
+    }
+    expect(settingsService.isCurrencySupported('XYZ'), isFalse);
+
+    await settingsService.setSelectedCurrency('XYZ');
+    final savedBudget = await settingsService.setMonthlyBudget(0);
+
+    expect(settingsService.selectedCurrency, AppConstants.defaultCurrency);
+    expect(savedBudget, AppConstants.defaultMonthlyBudget);
   });
 }

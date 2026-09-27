@@ -7,13 +7,14 @@ class CategorySelectionScreen extends StatefulWidget {
   final ValueChanged<ExpenseCategory>? onCategorySelected;
 
   const CategorySelectionScreen({
-    Key? key,
+    super.key,
     this.selectedCategoryId,
     this.onCategorySelected,
-  }) : super(key: key);
+  });
 
   @override
-  State<CategorySelectionScreen> createState() => _CategorySelectionScreenState();
+  State<CategorySelectionScreen> createState() =>
+      _CategorySelectionScreenState();
 }
 
 class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
@@ -36,7 +37,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   List<ExpenseCategory> get _filteredCategories {
     if (_searchQuery.trim().isEmpty) return _categories;
     return _categories
-        .where((cat) => cat.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where((cat) =>
+            cat.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
   }
 
@@ -93,7 +95,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -114,12 +116,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'New Category',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: AppConstants.textDark,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       IconButton(
@@ -129,9 +131,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Category Name',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 6),
                   TextField(
@@ -140,18 +145,23 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                     decoration: InputDecoration(
                       hintText: 'e.g. Pet Care, Books, Coffee',
                       filled: true,
-                      fillColor: const Color(0xFFF8F7FC),
+                      fillColor:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Choose Color',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppConstants.textMuted),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -166,9 +176,17 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                           decoration: BoxDecoration(
                             color: Color(c),
                             shape: BoxShape.circle,
-                            border: isSelected ? Border.all(color: Colors.black, width: 3) : null,
+                            border: isSelected
+                                ? Border.all(
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                    width: 3)
+                                : null,
                           ),
-                          child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
+                          child: isSelected
+                              ? const Icon(Icons.check,
+                                  color: Colors.white, size: 18)
+                              : null,
                         ),
                       );
                     }).toList(),
@@ -181,7 +199,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppConstants.primaryPurple,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: () {
                         final name = nameController.text.trim();
@@ -201,7 +220,9 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                         Navigator.pop(context);
                         _selectCategory(newCat);
                       },
-                      child: const Text('Create Category', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                      child: const Text('Create Category',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 15)),
                     ),
                   ),
                 ],
@@ -222,19 +243,29 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final textColor = Theme.of(context).colorScheme.onSurface;
     return Scaffold(
-      backgroundColor: AppConstants.backgroundLight,
+      backgroundColor:
+          isDark ? AppConstants.backgroundDark : AppConstants.backgroundLight,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFDED7FC),
-              Color(0xFFF4F2FB),
-              Color(0xFFF6F5FC),
-            ],
-            stops: [0.0, 0.25, 1.0],
+            colors: isDark
+                ? [
+                    const Color(0xFF111827),
+                    const Color(0xFF172033),
+                    const Color(0xFF111827)
+                  ]
+                : [
+                    const Color(0xFFDED7FC),
+                    const Color(0xFFF4F2FB),
+                    const Color(0xFFF6F5FC)
+                  ],
+            stops: const [0.0, 0.25, 1.0],
           ),
         ),
         child: SafeArea(
@@ -242,7 +273,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -250,21 +282,24 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85),
+                        color: surfaceColor,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white),
+                        border: Border.all(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back, size: 20, color: AppConstants.textDark),
+                        icon:
+                            Icon(Icons.arrow_back, size: 20, color: textColor),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Select Category',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        color: AppConstants.textDark,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(width: 42),
@@ -274,13 +309,16 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
 
               // Search Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: TextField(
                   controller: _searchController,
                   onChanged: (val) => setState(() => _searchQuery = val),
                   decoration: InputDecoration(
                     hintText: 'Search for Categories',
-                    prefixIcon: const Icon(Icons.search, size: 20, color: AppConstants.textMuted),
+                    prefixIcon: Icon(Icons.search,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.close, size: 16),
@@ -291,14 +329,16 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                           )
                         : null,
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.9),
+                    fillColor: surfaceColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.white.withOpacity(0.8)),
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.white.withOpacity(0.8)),
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -328,9 +368,10 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.85),
+                                color: surfaceColor,
                                 borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                                border: Border.all(
+                                    color: Colors.grey.shade300, width: 1.5),
                               ),
                               child: const Icon(
                                 Icons.add,
@@ -339,12 +380,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                               ),
                             ),
                             const SizedBox(height: 6),
-                            const Text(
+                            Text(
                               'Add',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppConstants.textDark,
+                                color: textColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -368,15 +409,20 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                                 width: 56,
                                 height: 56,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: surfaceColor,
                                   borderRadius: BorderRadius.circular(18),
                                   border: Border.all(
-                                    color: isSelected ? AppConstants.primaryPurple : Colors.white,
+                                    color: isSelected
+                                        ? AppConstants.primaryPurple
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .outlineVariant,
                                     width: isSelected ? 2 : 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF1E143C).withOpacity(0.04),
+                                      color: const Color(0xFF1E143C)
+                                          .withValues(alpha: 0.04),
                                       blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
@@ -413,8 +459,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                             cat.name,
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? AppConstants.primaryPurple : AppConstants.textDark,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? AppConstants.primaryPurple
+                                  : textColor,
                             ),
                             textAlign: TextAlign.center,
                             maxLines: 1,

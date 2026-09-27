@@ -2,6 +2,8 @@
 
 A modern, responsive mobile expense tracking application built with **Flutter** and **Dart**, backed by **Google Cloud Firestore**. The app provides real-time transaction tracking, categorical spending analysis, interactive monthly comparisons, and persistent cloud synchronization with an intuitive Material 3 user interface.
 
+The Android application is built from `lib/main.dart`. The repository also contains a separate React/Vite prototype under `src/`; it is not part of the Flutter Android build.
+
 Developed as a practical assessment project for the **Flutter Developer Internship at CyphLab**.
 
 ---
@@ -15,7 +17,7 @@ The following features are fully implemented in the current codebase:
 - **Delete Expenses**: Safely remove transactions with an interactive confirmation modal to prevent accidental data loss.
 - **Expense Categories**: Comprehensive built-in category catalog (Groceries, Travel, Transport, Rent, Insurance, Bills, Fitness, Dining, etc.) with custom icon containers and colors, plus a modal to create new custom categories.
 - **Firebase Cloud Firestore Storage**: Real-time cloud persistence using Firestore collections (`expenses`), synchronizing data reactively across sessions via Dart `Stream<List<Expense>>`.
-- **Monthly Expense Total**: Dynamic calculation of the current selected month's total spending, month-over-month velocity comparison (% change), and target budget progress indicator.
+- **Monthly Expense Total**: Dynamic calculation of the selected month's spending and progress against the saved target budget.
 - **Expense History**: Chronological transaction feed displaying grouped transactions with payment badges, category identifiers, and color-coded transaction amounts.
 - **Category & Date Filtering**: Filter transaction history by category chips, transaction type (All, Deposit of funds, Withdrawal of funds), or specific date filter.
 - **Keyword Search**: Real-time query search across merchant/title, notes, wallet account, and category names.
@@ -24,9 +26,10 @@ The following features are fully implemented in the current codebase:
   - `LoadingStateWidget`: Centered progress indicators during cloud data synchronization.
   - `EmptyStateWidget`: Clean illustrations and call-to-action buttons when no transactions exist for the selected month or filter.
   - `ErrorStateWidget`: Graceful error notifications with retry actions when network or Firestore operations encounter issues.
-- **Analytics & Dual Bar Chart**: Interactive monthly comparison visualization comparing Income vs. Expense totals, category spend percentage breakdown bars, and daily history summaries.
+- **Analytics & Dual Bar Chart**: Monthly Income vs. Expense totals and top spending categories calculated from Firestore transactions.
 - **CSV Data Export**: Export filtered transactions directly to downloadable CSV files.
-- **Multi-Currency Support**: Switch display currencies (USD `$`, EUR `€`, GBP `£`, JPY `¥`, INR `₹`, CAD `C$`) with consistent formatting across cards and charts.
+- **Multi-Currency Support**: Switch display currencies (USD `$`, EUR `€`, GBP `£`, JPY `¥`, INR `₹`, CAD `C$`, LKR `Rs.`) with selection persisted across app launches.
+- **Saved Preferences**: Monthly target budget and light/dark theme persist across app launches.
 
 ---
 
@@ -34,8 +37,8 @@ The following features are fully implemented in the current codebase:
 
 1. **Home Screen (`home_screen.dart`)**:
    - Month navigation pill selector (previous/next month switching).
-   - "This Month Spend" hero card with percentage change vs. prior month.
-   - Spending Wallet card showing active account balance and monthly budget progress.
+   - "This Month Spend" hero card and saved monthly budget progress.
+   - A compact light/dark theme toggle.
    - Quick-access Recent Transactions list with tap-to-edit interactions.
 
 2. **Add Expense Screen (`add_expense_screen.dart`)**:
@@ -66,10 +69,9 @@ The following features are fully implemented in the current codebase:
    - Grouped daily history list showing daily net totals.
 
 7. **Account & Settings Screen (`account_screen.dart`)**:
-   - User profile overview with Pro badge.
-   - Currency switcher updating currency symbols across the entire application.
-   - Monthly target budget editor with validation.
-   - Connected wallets overview (Spending Wallet, Credit Card, Savings Vault).
+   - Ifadha profile.
+   - Persisted currency selection and monthly target budget editor.
+   - Persisted light/dark theme selection from Home.
 
 ---
 
@@ -87,6 +89,7 @@ The following features are fully implemented in the current codebase:
 | `firebase_core` | `^3.1.0` | Core Firebase app initialization and platform coordination |
 | `cloud_firestore` | `^5.0.1` | Cloud Firestore database client, snapshots, and query streams |
 | `intl` | `^0.19.0` | Currency and date/time formatting utilities |
+| `shared_preferences` | `^2.3.2` | Persisted currency, monthly budget, and theme settings |
 | `cupertino_icons` | `^1.0.8` | Supporting iOS-style glyphs and fallback system icons |
 
 ---
@@ -167,7 +170,7 @@ This application connects to a Firebase Cloud Firestore project. To run this pro
      - `createdAt` (Timestamp)
      - `updatedAt` (Timestamp)
 
-*Note: No private keys, passwords, or secret service credentials are committed into this repository.*
+Firebase client configuration files contain Google API keys required by Firebase clients; these are not server credentials, but should be restricted to the intended applications and APIs in Google Cloud Console. Keys already committed to Git history require console-side rotation/restriction; removing a value from the current file alone does not remediate historical exposure.
 
 ---
 
@@ -210,7 +213,7 @@ This application connects to a Firebase Cloud Firestore project. To run this pro
 
 6. **Run the application**:
    ```bash
-   flutter run
+   flutter run -d <android-device-id>
    ```
    Press `r` in the terminal for hot reload, or `R` for hot restart.
 
@@ -224,7 +227,7 @@ This application connects to a Firebase Cloud Firestore project. To run this pro
 - **Filter and Search Expenses**: Tap the **Transactions** tab. Use the search bar to query by merchant name or note, tap the calendar icon to filter by date, or tap filter pills (**All**, **Deposit of funds**, **Withdrawal of funds**) and category chips.
 - **Edit an Expense**: Tap any transaction card in the Home or Transactions list to open the Edit modal. Adjust fields and tap **Update Expense**.
 - **Delete an Expense**: In the Edit modal, tap the trash can icon in the header, then confirm by tapping **Yes, Delete**.
-- **View Monthly Totals**: The Home dashboard displays "This Month Spend", percentage velocity compared to last month, and budget progress.
+- **View Monthly Totals**: The Home dashboard displays "This Month Spend" and progress against the saved target budget.
 - **View Analytics**: Tap the **Analytics** tab to view the dual bar chart (Income vs. Expense), top category percentage bars, and grouped daily history logs.
 
 ---
@@ -258,4 +261,3 @@ Potential enhancements planned for future releases:
 - **Multi-Account Syncing**: Dynamic bank account synchronization and multi-wallet balance transfers.
 - **Receipt Attachment**: Uploading receipt images using Firebase Cloud Storage and OCR text extraction.
 - **Recurring Schedules**: Background scheduled jobs to automatically post recurring subscriptions on billing dates.
-- **Dark Mode**: Complete system dark theme support with custom Material 3 color schemes.

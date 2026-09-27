@@ -5,12 +5,13 @@ class LoadingStateWidget extends StatelessWidget {
   final String message;
 
   const LoadingStateWidget({
-    Key? key,
+    super.key,
     this.message = 'Loading transactions...',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -22,16 +23,19 @@ class LoadingStateWidget extends StatelessWidget {
               height: 36,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryPurple),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppConstants.primaryPurple),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppConstants.textMuted,
+                color: isDark
+                    ? AppConstants.textLight.withValues(alpha: 0.7)
+                    : AppConstants.textMuted,
               ),
             ),
           ],

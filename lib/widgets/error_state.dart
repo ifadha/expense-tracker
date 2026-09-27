@@ -6,25 +6,27 @@ class ErrorStateWidget extends StatelessWidget {
   final VoidCallback? onRetry;
 
   const ErrorStateWidget({
-    Key? key,
+    super.key,
     required this.errorMessage,
     this.onRetry,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? AppConstants.cardDark : Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(width: 1),
+            border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant, width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -47,21 +49,24 @@ class ErrorStateWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Something went wrong',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppConstants.textDark,
+                  color:
+                      isDark ? AppConstants.textLight : AppConstants.textDark,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 errorMessage,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppConstants.textMuted,
+                  color: isDark
+                      ? AppConstants.textLight.withValues(alpha: 0.7)
+                      : AppConstants.textMuted,
                 ),
               ),
               if (onRetry != null) ...[
@@ -74,7 +79,8 @@ class ErrorStateWidget extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   child: const Text('Retry'),
                 ),

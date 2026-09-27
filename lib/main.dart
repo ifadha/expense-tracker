@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'app/app.dart';
 import 'services/expense_service.dart';
 import 'services/firebase_config.dart';
+import 'services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,10 @@ void main() async {
 
   // Instantiate dedicated Firestore ExpenseService
   final expenseService = ExpenseService();
+  await AppSettingsService.instance.init();
 
-  runApp(LuminaExpenseApp(expenseService: expenseService));
+  runApp(LuminaExpenseApp(
+    expenseService: expenseService,
+    settingsService: AppSettingsService.instance,
+  ));
 }

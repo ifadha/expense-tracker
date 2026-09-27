@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/expense.dart';
 import '../../services/expense_service.dart';
+import '../../services/settings_service.dart';
 import '../../utils/constants.dart';
 import '../../widgets/monthly_summary.dart';
 import '../../widgets/expense_card.dart';
 import '../../widgets/loading_state.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
-import '../expenses/add_expense_screen.dart';
 import '../expenses/edit_expense_screen.dart';
 import '../expenses/expense_history_screen.dart';
 
@@ -16,21 +16,34 @@ class HomeScreen extends StatefulWidget {
   final ExpenseService expenseService;
 
   const HomeScreen({
-    Key? key,
+    super.key,
     required this.expenseService,
-  }) : super(key: key);
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final AppSettingsService _settings = AppSettingsService.instance;
   late DateTime _selectedMonth;
 
   @override
   void initState() {
     super.initState();
-    _selectedMonth = DateTime(2026, 9);
+    _settings.addListener(_handleSettingsChanged);
+    final now = DateTime.now();
+    _selectedMonth = DateTime(now.year, now.month);
+  }
+
+  void _handleSettingsChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _settings.removeListener(_handleSettingsChanged);
+    super.dispose();
   }
 
   void _previousMonth() {
@@ -48,20 +61,30 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final monthName = DateFormat('MMMM yyyy').format(_selectedMonth);
+    final currency = _settings.selectedCurrency;
+    final monthlyBudget = _settings.monthlyBudget;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppConstants.backgroundLight,
+      backgroundColor:
+          isDark ? AppConstants.backgroundDark : AppConstants.backgroundLight,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFDED7FC),
-              Color(0xFFF4F2FB),
-              Color(0xFFF6F5FC),
-            ],
-            stops: [0.0, 0.35, 1.0],
+            colors: isDark
+                ? [
+                    const Color(0xFF111827),
+                    const Color(0xFF172033),
+                    const Color(0xFF111827),
+                  ]
+                : [
+                    const Color(0xFFDED7FC),
+                    const Color(0xFFF4F2FB),
+                    const Color(0xFFF6F5FC),
+                  ],
+            stops: const [0.0, 0.35, 1.0],
           ),
         ),
         child: SafeArea(
@@ -83,7 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
               }
 
               final expenses = snapshot.data ?? [];
-              final totalSpend = widget.expenseService.calculateMonthTotal(expenses);
+              final totalSpend =
+                  widget.expenseService.calculateMonthTotal(expenses);
 
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -91,20 +115,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Top Navigation Bar
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildCircularButton(
-                            icon: Icons.tune,
-                            onTap: () {},
+                            icon: _settings.isDarkMode
+                                ? Icons.light_mode_outlined
+                                : Icons.dark_mode_outlined,
+                            onTap: () async {
+                              await _settings
+                                  .setDarkMode(!_settings.isDarkMode);
+                              if (mounted) setState(() {});
+                            },
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.8),
+                              color: isDark
+                                  ? const Color(0xFF1A2333)
+                                  : Colors.white.withValues(alpha: 0.8),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withOpacity(0.8)),
+                              border: Border.all(
+                                  color: isDark
+                                      ? const Color(0xFF2B374B)
+                                      : Colors.white.withValues(alpha: 0.8)),
                             ),
                             child: Row(
                               children: [
@@ -116,10 +153,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 6),
                                 Text(
                                   DateFormat('E, d MMM').format(DateTime.now()),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: AppConstants.textDark,
+                                    color: isDark
+                                        ? AppConstants.textLight
+                                        : AppConstants.textDark,
                                   ),
                                 ),
                               ],
@@ -140,9 +179,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: MonthlySummaryWidget(
                         totalSpend: totalSpend,
-                        totalBudget: 3200.0,
-                        percentageChange: 67,
-                        isBelowLastMonth: true,
+                        totalBudget: monthlyBudget,
+                        currencySymbol: currency,
                         monthName: monthName,
                         onPreviousMonth: _previousMonth,
                         onNextMonth: _nextMonth,
@@ -152,84 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-                  // Spending Wallet Card
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: Colors.white),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF1E143C).withOpacity(0.03),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF4F0FF),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(
-                                Icons.account_balance_wallet_outlined,
-                                color: AppConstants.primaryPurple,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Spending Wallet',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppConstants.textDark,
-                                    ),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Active Checking',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppConstants.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Text(
-                              '\$5,631.22',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppConstants.textDark,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.chevron_right,
-                              size: 18,
-                              color: AppConstants.textMuted,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
                   // Recent Transactions Header
                   SliverToBoxAdapter(
@@ -238,12 +199,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Recent Transactions',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: AppConstants.textDark,
+                              color: isDark
+                                  ? AppConstants.textLight
+                                  : AppConstants.textDark,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -258,12 +221,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'See All',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppConstants.textMuted,
+                                color: isDark
+                                    ? AppConstants.textLight
+                                        .withValues(alpha: 0.8)
+                                    : AppConstants.textMuted,
                               ),
                             ),
                           ),
@@ -276,11 +242,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (expenses.isEmpty)
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
                         child: EmptyStateWidget(
                           title: 'No expenses for $monthName',
-                          description: 'Record an expense to see it in your monthly overview.',
-                          onAction: () => _openAddExpense(context),
+                          description:
+                              'Record an expense to see it in your monthly overview.',
                         ),
                       ),
                     )
@@ -308,23 +275,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openAddExpense(context),
-        backgroundColor: AppConstants.primaryDark,
-        elevation: 6,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  void _openAddExpense(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddExpenseScreen(expenseService: widget.expenseService),
-      ),
     );
   }
 
@@ -340,18 +290,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCircularButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildCircularButton(
+      {required IconData icon, required VoidCallback onTap}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        color: isDark
+            ? AppConstants.cardDark
+            : Colors.white.withValues(alpha: 0.85),
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white),
+        border:
+            Border.all(color: isDark ? const Color(0xFF2B374B) : Colors.white),
       ),
       child: IconButton(
         icon: Icon(icon, size: 18),
-        color: AppConstants.textDark,
+        color: isDark ? AppConstants.textLight : AppConstants.textDark,
         onPressed: onTap,
         padding: EdgeInsets.zero,
       ),
