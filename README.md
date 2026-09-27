@@ -1,8 +1,8 @@
 # Expense Tracker
 
-A modern, responsive mobile expense tracking application built with **Flutter** and **Dart**, backed by **Google Cloud Firestore**. The app provides real-time transaction tracking, categorical spending analysis, interactive monthly comparisons, and persistent cloud synchronization with an intuitive Material 3 user interface.
+A modern Flutter expense-tracking application built with **Flutter and Dart**, backed by **Google Cloud Firestore**. The app provides transaction management, category-based spending analysis, monthly comparisons, cloud synchronization, and a Material 3 interface.
 
-The Android application is built from `lib/main.dart`. The repository also contains a separate React/Vite prototype under `src/`; it is not part of the Flutter Android build.
+The Android application is built from `lib/main.dart`. The repository also contains a separate React/Vite prototype under `src/`; it is **not part of the Flutter Android build**.
 
 Developed as a practical assessment project for the **Flutter Developer Internship at CyphLab**.
 
@@ -10,167 +10,303 @@ Developed as a practical assessment project for the **Flutter Developer Internsh
 
 ## Features
 
-The following features are fully implemented in the current codebase:
+### Transaction Management
 
-- **Add Expenses & Income**: Record financial transactions with title, numerical amount, category selection, transaction date, payment wallet, and optional notes/memo.
-- **Edit Expenses**: Modify existing transaction details (title, amount, category, date, wallet, notes) with instant updates written back to Cloud Firestore.
-- **Delete Expenses**: Safely remove transactions with an interactive confirmation modal to prevent accidental data loss.
-- **Expense Categories**: Comprehensive built-in category catalog (Groceries, Travel, Transport, Rent, Insurance, Bills, Fitness, Dining, etc.) with custom icon containers and colors, plus a modal to create new custom categories.
-- **Firebase Cloud Firestore Storage**: Real-time cloud persistence using Firestore collections (`expenses`), synchronizing data reactively across sessions via Dart `Stream<List<Expense>>`.
-- **Monthly Expense Total**: Dynamic calculation of the selected month's spending and progress against the saved target budget.
-- **Expense History**: Chronological transaction feed displaying grouped transactions with payment badges, category identifiers, and color-coded transaction amounts.
-- **Category & Date Filtering**: Filter transaction history by category chips, transaction type (All, Deposit of funds, Withdrawal of funds), or specific date filter.
-- **Keyword Search**: Real-time query search across merchant/title, notes, wallet account, and category names.
-- **Form Validation**: Strict client-side checks verifying positive amounts (> $0), required title inputs, valid category selection, and valid ISO date formats before enabling submission.
-- **Loading, Empty, and Error States**:
-  - `LoadingStateWidget`: Centered progress indicators during cloud data synchronization.
-  - `EmptyStateWidget`: Clean illustrations and call-to-action buttons when no transactions exist for the selected month or filter.
-  - `ErrorStateWidget`: Graceful error notifications with retry actions when network or Firestore operations encounter issues.
-- **Analytics & Dual Bar Chart**: Monthly Income vs. Expense totals and top spending categories calculated from Firestore transactions.
-- **CSV Data Export**: Export filtered transactions directly to downloadable CSV files.
-- **Multi-Currency Support**: Switch display currencies (USD `$`, EUR `€`, GBP `£`, JPY `¥`, INR `₹`, CAD `C$`, LKR `Rs.`) with selection persisted across app launches.
-- **Saved Preferences**: Monthly target budget and light/dark theme persist across app launches.
+* **Add expenses and income**
+
+  * Title
+  * Amount
+  * Category
+  * Transaction date
+  * Wallet
+  * Optional note/memo
+* **Edit existing transactions**
+* **Delete transactions** with confirmation
+* Expense and income transaction types
+* Persistent cloud storage using Cloud Firestore
+
+### Categories
+
+* Built-in expense categories including:
+
+  * Groceries
+  * Travel
+  * Transport
+  * Rent
+  * Insurance
+  * Bills
+  * Fitness
+  * Dining
+  * And more
+* Category icons and visual styling
+* Category search
+* Custom category creation
+
+### Dashboard & Monthly Tracking
+
+* Current-month spending total
+* Monthly target budget
+* Budget progress
+* Previous/next month navigation
+* Recent transaction overview
+* Income and expense summaries
+
+### Transaction History
+
+* Chronological transaction history
+* Search transactions by:
+
+  * Title/merchant
+  * Notes
+  * Wallet
+  * Category
+* Filter by:
+
+  * Category
+  * Date
+  * Transaction type
+* Transaction types:
+
+  * All
+  * Deposit of funds
+  * Withdrawal of funds
+* CSV export of filtered transactions
+
+### Analytics
+
+* Monthly income vs. expense comparison
+* Dual bar chart
+* Top spending categories
+* Category spending percentages
+* Grouped daily transaction history
+* Income and expense summary metrics
+
+### Validation & States
+
+* Required-field validation
+* Positive amount validation
+* Category validation
+* Date validation
+* Loading states during Firestore operations
+* Empty states when no transactions match the current view
+* Error states with retry actions
+
+### Preferences
+
+* Multi-currency display support:
+
+  * USD (`$`)
+  * EUR (`€`)
+  * GBP (`£`)
+  * JPY (`¥`)
+  * INR (`₹`)
+  * CAD (`C$`)
+  * LKR (`Rs.`)
+* Persisted monthly budget
+* Persisted currency selection
+* Light/dark theme preference
 
 ---
 
 ## Screens
 
-1. **Home Screen (`home_screen.dart`)**:
-   - Month navigation pill selector (previous/next month switching).
-   - "This Month Spend" hero card and saved monthly budget progress.
-   - A compact light/dark theme toggle.
-   - Quick-access Recent Transactions list with tap-to-edit interactions.
+### Home
 
-2. **Add Expense Screen (`add_expense_screen.dart`)**:
-   - Header with Expense / Income segment toggle.
-   - Form fields for Title (with one-tap quick preset tags), Amount, Date (with "Today" / "Yesterday" presets and native calendar picker), Wallet selection, and Note.
-   - Horizontal category chip carousel with a "View All" link directing to the full Category Selection screen.
-   - Primary action button with reactive validation and progress indicator.
+* Monthly navigation
+* Current-month spending summary
+* Monthly budget progress
+* Light/dark theme toggle
+* Recent transactions
+* Quick access to transaction editing
 
-3. **Category Selection Screen (`category_selection_screen.dart`)**:
-   - Clean 4-column icon grid showing categories with distinct colors and glyphs.
-   - Real-time search filter bar to quickly locate categories.
-   - "+ Add" category modal dialog allowing users to create custom categories with tailored colors.
+### Add Transaction
 
-4. **Expense History Screen (`expense_history_screen.dart`)**:
-   - Full transaction archive with search bar, date filter picker, and CSV export action.
-   - Filter pills for All, Deposit of funds (income), and Withdrawal of funds (expense).
-   - Category filter chip strip and empty state handler when zero records match filters.
+* Expense / Income toggle
+* Title and amount fields
+* Quick title presets
+* Date selection with Today/Yesterday shortcuts
+* Native date picker
+* Wallet selection
+* Notes
+* Category selection
+* Form validation
+* Submission progress state
 
-5. **Edit Expense Screen (`edit_expense_screen.dart`)**:
-   - Bottom-sheet dialog to edit any transaction property with pre-filled inputs.
-   - In-line category selector grid.
-   - Permanent delete button with confirmation step.
+### Category Selection
 
-6. **Analytics Screen (`analytics_screen.dart`)**:
-   - Dual bar chart comparing monthly income and expenses with interactive value tooltips.
-   - High-level metric summary cards for Income and Expenses.
-   - Top Categories progress bars highlighting proportional spending.
-   - Grouped daily history list showing daily net totals.
+* Four-column category grid
+* Category search
+* Built-in categories
+* Custom category creation
 
-7. **Account & Settings Screen (`account_screen.dart`)**:
-   - Ifadha profile.
-   - Persisted currency selection and monthly target budget editor.
-   - Persisted light/dark theme selection from Home.
+### Transaction History
+
+* Complete transaction archive
+* Search
+* Date filtering
+* Category filtering
+* Income/expense filtering
+* CSV export
+
+### Edit Transaction
+
+* Pre-filled transaction details
+* Transaction editing
+* Category selection
+* Delete action
+* Delete confirmation
+
+### Analytics
+
+* Income vs. expense monthly chart
+* Income and expense summary cards
+* Top spending categories
+* Category percentage indicators
+* Daily transaction summaries
+
+### Account & Settings
+
+* Profile section
+* Currency selection
+* Monthly target budget
+* Theme preferences
 
 ---
 
 ## Tech Stack
 
-- **Framework**: [Flutter](https://flutter.dev/) (SDK `>=3.0.0 <4.0.0`, Material 3 design system)
-- **Language**: [Dart](https://dart.dev/)
-- **Backend & Database**: [Firebase Cloud Firestore](https://firebase.google.com/docs/firestore)
-- **State Management & Data Flow**: Stateful widgets, reactive Streams (`Stream<List<Expense>>`), and repository service architecture.
+| Technology                   | Purpose                                      |
+| ---------------------------- | -------------------------------------------- |
+| **Flutter**                  | Cross-platform application framework         |
+| **Dart**                     | Application programming language             |
+| **Material 3**               | UI design system                             |
+| **Firebase Cloud Firestore** | Cloud database and real-time synchronization |
+| **Shared Preferences**       | Local persistence for user preferences       |
+| **Intl**                     | Currency and date formatting                 |
 
-### Key Flutter Packages Used
+### Key Flutter Packages
 
-| Package | Version | Purpose |
-| :--- | :--- | :--- |
-| `firebase_core` | `^3.1.0` | Core Firebase app initialization and platform coordination |
-| `cloud_firestore` | `^5.0.1` | Cloud Firestore database client, snapshots, and query streams |
-| `intl` | `^0.19.0` | Currency and date/time formatting utilities |
-| `shared_preferences` | `^2.3.2` | Persisted currency, monthly budget, and theme settings |
-| `cupertino_icons` | `^1.0.8` | Supporting iOS-style glyphs and fallback system icons |
+| Package              |   Version | Purpose                                         |
+| -------------------- | --------: | ----------------------------------------------- |
+| `firebase_core`      |  `^3.1.0` | Firebase initialization                         |
+| `cloud_firestore`    |  `^5.0.1` | Firestore database access and real-time streams |
+| `intl`               | `^0.19.0` | Currency and date formatting                    |
+| `shared_preferences` |  `^2.3.2` | Persistent local preferences                    |
+| `cupertino_icons`    |  `^1.0.8` | Supporting iOS-style icons                      |
 
 ---
 
-## Project Structure
+## Architecture
 
-```
+The Flutter application is organized into separate layers for models, services, screens, reusable widgets, and application configuration.
+
+```text
 lib/
-├── main.dart                   # Application entry point & service injection
+├── main.dart
+│
 ├── app/
-│   ├── app.dart                # MaterialApp configuration, title & theme binding
-│   ├── routes.dart             # Named routing definitions & onGenerateRoute factory
-│   └── theme.dart              # Material 3 colors, typography & component themes
+│   ├── app.dart
+│   ├── routes.dart
+│   └── theme.dart
+│
 ├── models/
-│   ├── category.dart           # ExpenseCategory model, icons & color mapping
-│   └── expense.dart            # Expense domain model with Firestore serialization
+│   ├── category.dart
+│   └── expense.dart
+│
 ├── services/
-│   ├── expense_service.dart    # Cloud Firestore CRUD, real-time streams & aggregations
-│   └── firebase_config.dart    # Isolated Firebase initialization layer
+│   ├── expense_service.dart
+│   └── firebase_config.dart
+│
 ├── utils/
-│   ├── constants.dart          # Palette colors, default categories & configuration
-│   └── validators.dart         # Form validation rules (amount, title, category, date)
+│   ├── constants.dart
+│   └── validators.dart
+│
 ├── screens/
-│   ├── main_nav_screen.dart    # Bottom navigation shell with floating action button
+│   ├── main_nav_screen.dart
+│   │
 │   ├── home/
-│   │   └── home_screen.dart    # Dashboard overview & monthly summary
+│   │   └── home_screen.dart
+│   │
 │   ├── expenses/
-│   │   ├── add_expense_screen.dart        # Transaction creation form
-│   │   ├── edit_expense_screen.dart       # Edit / Delete modal bottom sheet
-│   │   ├── category_selection_screen.dart # 4-column category picker & creator
-│   │   ├── expense_history_screen.dart    # Filterable transaction archive
-│   │   └── expense_details_screen.dart    # Detailed single transaction view
+│   │   ├── add_expense_screen.dart
+│   │   ├── edit_expense_screen.dart
+│   │   ├── category_selection_screen.dart
+│   │   ├── expense_history_screen.dart
+│   │   └── expense_details_screen.dart
+│   │
 │   ├── analytics/
-│   │   └── analytics_screen.dart          # Dual bar chart & spending analytics
+│   │   └── analytics_screen.dart
+│   │
 │   └── account/
-│       └── account_screen.dart            # Settings, currency & monthly budget
+│       └── account_screen.dart
+│
 └── widgets/
-    ├── category_selector.dart  # Horizontal category chip selector
-    ├── expense_card.dart       # Transaction row card with badges & indicators
-    ├── monthly_summary.dart    # Header card with spend totals & percentage trend
-    ├── spending_chart.dart     # Custom dual-bar comparison chart
-    ├── loading_state.dart      # Reusable loading indicator
-    ├── empty_state.dart        # Reusable empty list placeholder
-    └── error_state.dart        # Reusable error banner with retry trigger
+    ├── category_selector.dart
+    ├── expense_card.dart
+    ├── monthly_summary.dart
+    ├── spending_chart.dart
+    ├── loading_state.dart
+    ├── empty_state.dart
+    └── error_state.dart
 ```
+
+Firestore data is exposed through reactive Dart streams, allowing transaction changes to be reflected in the application UI.
 
 ---
 
-## Firebase Setup
+## Firebase
 
-This application connects to a Firebase Cloud Firestore project. To run this project against your own Firebase project:
+The application uses **Cloud Firestore** for transaction persistence and real-time data synchronization.
 
-1. **Create a Firebase Project**:
-   - Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project.
-   - Under **Build**, select **Firestore Database** and create a database in **Test mode** (or apply the security rules provided in `firestore.rules`).
+The primary collection is:
 
-2. **Configure Platform Credentials**:
-   - **Android**: Register your Android application package name (e.g., `com.example.lumina_expense_tracker`), download `google-services.json`, and place it in `android/app/`.
-   - **iOS**: Register your iOS bundle ID, download `GoogleService-Info.plist`, and place it in `ios/Runner/`.
-   - **FlutterFire CLI (Recommended)**:
-     ```bash
-     dart pub global activate flutterfire_cli
-     flutterfire configure
-     ```
-     This automatically registers all platforms and creates `lib/firebase_options.dart`.
+```text
+expenses
+```
 
-3. **Collection Structure**:
-   - The app reads and writes documents to the `expenses` collection.
-   - Document fields:
-     - `title` (String, required)
-     - `amount` (Number, required)
-     - `category` / `categoryId` (String, required)
-     - `date` (Timestamp or ISO 8601 String, required)
-     - `note` (String, optional)
-     - `type` (String, `"expense"` or `"income"`)
-     - `wallet` (String)
-     - `recurring` (Boolean)
-     - `createdAt` (Timestamp)
-     - `updatedAt` (Timestamp)
+Transactions contain fields such as:
 
-Firebase client configuration files contain Google API keys required by Firebase clients; these are not server credentials, but should be restricted to the intended applications and APIs in Google Cloud Console. Keys already committed to Git history require console-side rotation/restriction; removing a value from the current file alone does not remediate historical exposure.
+```text
+title
+amount
+category
+categoryId
+date
+note
+type
+wallet
+createdAt
+updatedAt
+```
+
+### Firebase Configuration
+
+To connect the project to a Firebase project:
+
+1. Create a Firebase project.
+2. Enable **Cloud Firestore**.
+3. Register the Android application using the package ID:
+
+```text
+com.example.lumina_expense_tracker
+```
+
+4. Place the generated `google-services.json` in:
+
+```text
+android/app/
+```
+
+5. Configure the required Firebase project settings.
+6. Run:
+
+```bash
+flutter pub get
+```
+
+The project already contains Firebase initialization for the configured application.
+
+> **Security note:** Firestore security rules should be reviewed and appropriately restricted before using the application with sensitive or production data. The current application does not implement user authentication or per-user data isolation.
 
 ---
 
@@ -178,86 +314,159 @@ Firebase client configuration files contain Google API keys required by Firebase
 
 ### Prerequisites
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (`>= 3.0.0`)
-- [Dart SDK](https://dart.dev/get-dart)
-- [Android Studio](https://developer.android.com/studio) or [VS Code](https://code.visualstudio.com/) with Flutter and Dart extensions
-- Android Emulator, iOS Simulator, or connected physical device with USB debugging enabled
+* Flutter SDK
+* Dart SDK
+* Android Studio or VS Code
+* Flutter and Dart VS Code extensions
+* Android emulator or physical Android device
 
-### Setup Instructions (Windows / VS Code)
+### Clone the Repository
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd lumina_expense_tracker
-   ```
+```bash
+git clone <repository-url>
+cd expense-tracker
+```
 
-2. **Open the project in VS Code**:
-   ```bash
-   code .
-   ```
+### Install Dependencies
 
-3. **Install dependencies**:
-   ```bash
-   flutter pub get
-   ```
+```bash
+flutter pub get
+```
 
-4. **Verify your Flutter environment**:
-   ```bash
-   flutter doctor
-   ```
-   Ensure that the Android toolchain and connected devices show green checkmarks.
+### Check the Flutter Environment
 
-5. **Start your device**:
-   - Open Android Studio Device Manager and launch an emulator, or connect a physical phone via USB.
-   - In VS Code, verify the target device appears in the bottom status bar.
+```bash
+flutter doctor
+```
 
-6. **Run the application**:
-   ```bash
-   flutter run -d <android-device-id>
-   ```
-   Press `r` in the terminal for hot reload, or `R` for hot restart.
+### Check Available Devices
+
+```bash
+flutter devices
+```
+
+### Run on Android
+
+```bash
+flutter run -d <android-device-id>
+```
+
+For development, Flutter hot reload can be triggered by pressing:
+
+```text
+r
+```
+
+Hot restart:
+
+```text
+R
+```
+
+### Build a Release APK
+
+```bash
+flutter build apk --release
+```
+
+The generated APK is located at:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
 
 ---
 
 ## Usage
 
-- **Add an Expense**: Tap the center floating action button (`+`) in the bottom navigation bar. Choose Expense or Income, input a title and amount, select a category, pick a date, and tap **Add Expense**.
-- **Select a Category**: Tap any category pill in the horizontal selector, or tap **View All** to navigate to the 4-column Category Selection screen with real-time search. Tap "+ Add" to create a custom category.
-- **View Expenses**: The **Home** screen displays recent transactions for the selected month. Navigate between months using the left/right chevrons in the top date pill.
-- **Filter and Search Expenses**: Tap the **Transactions** tab. Use the search bar to query by merchant name or note, tap the calendar icon to filter by date, or tap filter pills (**All**, **Deposit of funds**, **Withdrawal of funds**) and category chips.
-- **Edit an Expense**: Tap any transaction card in the Home or Transactions list to open the Edit modal. Adjust fields and tap **Update Expense**.
-- **Delete an Expense**: In the Edit modal, tap the trash can icon in the header, then confirm by tapping **Yes, Delete**.
-- **View Monthly Totals**: The Home dashboard displays "This Month Spend" and progress against the saved target budget.
-- **View Analytics**: Tap the **Analytics** tab to view the dual bar chart (Income vs. Expense), top category percentage bars, and grouped daily history logs.
+### Add a Transaction
+
+1. Tap the central `+` button.
+2. Select **Expense** or **Income**.
+3. Enter a title and amount.
+4. Select a category.
+5. Choose the transaction date.
+6. Select a wallet.
+7. Optionally add a note.
+8. Submit the transaction.
+
+### Edit a Transaction
+
+Select a transaction from the Home or Transactions screen and modify the required fields.
+
+### Delete a Transaction
+
+Open a transaction and select the delete action. Confirm the deletion when prompted.
+
+### Filter Transactions
+
+Open the Transactions screen and use:
+
+* Search
+* Date filtering
+* Category filtering
+* Transaction type filtering
+
+### View Analytics
+
+Open the **Analytics** tab to view:
+
+* Monthly income
+* Monthly expenses
+* Income vs. expense comparison
+* Top spending categories
+* Daily transaction summaries
+
+### Export Transactions
+
+Use the CSV export action from the Transactions screen to export the currently filtered transaction data.
 
 ---
 
-## AI Tools Used
+## AI-Assisted Development
 
-This project was developed with assistance from modern AI development tools:
+AI development tools were used as part of the development workflow:
 
-- **Google AI Studio**: Used for application implementation, code generation, debugging, architectural structuring, and documentation assistance.
-- **Google Stitch**: Used for UI/UX exploration, mobile design layouts, color palette harmony, and visual design direction.
-- **ChatGPT**: Used for initial development planning, technical guidance, debugging, architectural review, and Flutter/Firebase pattern validation.
+* **Google AI Studio** — implementation assistance, code generation, debugging, architectural structuring, and documentation.
+* **Google Stitch** — UI/UX exploration and visual design direction.
+* **ChatGPT** — development planning, technical guidance, debugging, and Flutter/Firebase pattern review.
 
-All AI-assisted outputs were systematically reviewed, manually edited, tested, and integrated to ensure clean code quality, reliable execution, and adherence to project requirements.
+AI-generated output was reviewed, modified, tested, and integrated during development.
 
 ---
 
-## Assessment Notes
+## Assessment
 
-This project was developed and submitted as part of the practical assessment for the **Flutter Developer Internship at CyphLab**. It showcases:
-- Clean Dart and Flutter project architecture (separation of models, services, screens, and widgets).
-- Material 3 aesthetic implementation faithful to mobile design principles.
-- Real-time cloud database integration using Google Cloud Firestore.
-- Complete CRUD workflow handling loading, empty, and error edge cases.
+This project was developed as part of the practical assessment for the **Flutter Developer Internship at CyphLab**.
+
+The implementation demonstrates:
+
+* Flutter and Dart application development
+* Material 3 UI implementation
+* Firebase Cloud Firestore integration
+* Create, read, update, and delete transaction workflows
+* Transaction filtering and search
+* Form validation
+* Loading, empty, and error states
+* Monthly spending analysis
+* Data visualization
+* CSV export
+* Persistent application preferences
 
 ---
 
 ## Future Improvements
 
-Potential enhancements planned for future releases:
-- **Firebase Authentication**: User accounts with email/password and Google Sign-In to allow multiple users to manage distinct isolated ledgers.
-- **Multi-Account Syncing**: Dynamic bank account synchronization and multi-wallet balance transfers.
-- **Receipt Attachment**: Uploading receipt images using Firebase Cloud Storage and OCR text extraction.
-- **Recurring Schedules**: Background scheduled jobs to automatically post recurring subscriptions on billing dates.
+Potential future enhancements include:
+
+* **Firebase Authentication**
+
+  * Email/password authentication
+  * Google Sign-In
+  * User-specific transaction data
+* **Multi-account and wallet management**
+* **Receipt image attachments**
+* **Firebase Cloud Storage integration**
+* **OCR-based receipt data extraction**
+* **Recurring transaction scheduling**
+* **Background processing for scheduled transactions**
