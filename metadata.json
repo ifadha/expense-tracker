@@ -1,0 +1,6 @@
+{
+  "name": "Lumina Expense Tracker",
+  "description": "A modern, polished mobile expense tracker with personalized dashboard, category management, visual analytics, and intuitive transaction logging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

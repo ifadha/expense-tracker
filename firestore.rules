@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidExpense(data) {
+      return data.keys().hasAll(['title', 'amount', 'date'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.amount is number && data.amount > 0
+        && data.date is string && data.date.size() == 10
+        && (!('category' in data) || (data.category is string && data.category.size() > 0 && data.category.size() <= 60))
+        && (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() > 0 && data.categoryId.size() <= 60))
+        && (!('type' in data) || data.type in ['expense', 'income'])
+        && (!('note' in data) || (data.note is string && data.note.size() <= 500))
+        && (!('wallet' in data) || (data.wallet is string && data.wallet.size() <= 100))
+        && (!('recurring' in data) || data.recurring is bool)
+        && (!('timestamp' in data) || data.timestamp is timestamp)
+        && (!('createdAt' in data) || data.createdAt is string || data.createdAt is timestamp)
+        && (!('updatedAt' in data) || data.updatedAt is string || data.updatedAt is timestamp);
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow get: if true;
+      allow list: if false;
+    }
+
+    // Expenses collection
+    match /expenses/{expenseId} {
+      allow get: if isValidId(expenseId);
+      allow list: if true;
+      allow create: if isValidId(expenseId) && isValidExpense(request.resource.data);
+      allow update: if isValidId(expenseId) && isValidExpense(request.resource.data);
+      allow delete: if isValidId(expenseId);
+    }
+  }
+}

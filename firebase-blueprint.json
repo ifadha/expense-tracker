@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "Expense": {
+      "title": "Expense",
+      "description": "Represents an expense or income entry in the tracker",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Name or merchant of the expense"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Monetary amount of the transaction"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Category name or identifier"
+        },
+        "categoryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Category identifier for relational mapping"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Transaction date in YYYY-MM-DD format"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["expense", "income"],
+          "description": "Type of transaction"
+        },
+        "wallet": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Wallet or payment account name"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Optional note or memo"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["title", "amount", "date"]
+    }
+  },
+  "firestore": {
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Collection of all expenses tracked in the application"
+    }
+  }
+}

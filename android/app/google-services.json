@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1090747709692",
+    "firebase_url": "https://my-expense-tracker-6fb37-default-rtdb.firebaseio.com",
+    "project_id": "my-expense-tracker-6fb37",
+    "storage_bucket": "my-expense-tracker-6fb37.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090747709692:android:339ed46795d6e3b9e0bf79",
+        "android_client_info": {
+          "package_name": "com.example.lumina_expense_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd02415uGUX-M1cL7zROmbBY25I5MgmXc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
