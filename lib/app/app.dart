@@ -39,8 +39,8 @@ class LuminaExpenseApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
             initialRoute: AppRoutes.home,
-            onGenerateRoute: (settings) => AppRoutes.onGenerateRoute(
-                settings, expenseService, settingsService),
+            onGenerateRoute: (settings) =>
+                AppRoutes.onGenerateRoute(settings, expenseService),
           ),
         );
       },

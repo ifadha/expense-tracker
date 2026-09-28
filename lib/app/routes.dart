@@ -17,9 +17,8 @@ class AppRoutes {
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
-    ExpenseService service, [
-    Object? settingsService,
-  ]) {
+    ExpenseService service,
+  ) {
     switch (settings.name) {
       case home:
         return MaterialPageRoute(

@@ -55,9 +55,10 @@ class Expense {
     if (dateVal is Timestamp) {
       parsedDate = dateVal.toDate();
     } else if (dateVal is String) {
-      parsedDate = DateTime.tryParse(dateVal) ?? DateTime.now();
+      parsedDate = DateTime.tryParse(dateVal) ??
+          (throw FormatException('Invalid expense date: $dateVal'));
     } else {
-      parsedDate = DateTime.now();
+      throw const FormatException('Missing or invalid expense date');
     }
 
     DateTime? parsedCreatedAt;
